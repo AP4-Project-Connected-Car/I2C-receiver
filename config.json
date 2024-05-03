@@ -1,0 +1,19 @@
+{
+    "components": {
+        "wheel_counter": {
+            "addr": 11,
+            "timeout": 1,
+            "err_timeout": 5
+        },
+        "battery": {
+            "addr": 12,
+            "timeout": 1,
+            "err_timeout": 5
+        },
+        "cooling_liquid_temp": {
+            "addr": 13,
+            "timeout": 1,
+            "err_timeout": 5
+        }
+    }
+}
