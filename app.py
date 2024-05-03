@@ -1,3 +1,4 @@
+# TODO: Uncomment bus library import
 # from smbus2 import SMBus
 import time, json, threading, os, importlib
 
@@ -27,8 +28,11 @@ def read_data_from_component(name, bus):
 
     while running:
         try:
+            # Import and run the component read function
             comp_module = importlib.import_module(f"readers.{name}")
             timeout = comp_module.read_bus(bus)
+
+            # Wait before read again
             time.sleep(timeout)
 
         except KeyboardInterrupt:  # Quitting
