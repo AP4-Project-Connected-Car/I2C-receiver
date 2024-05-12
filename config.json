@@ -17,6 +17,6 @@
         }
     },
     "ws": {
-        "uri": "ws://server:8082"
+        "uri": "ws://server"
     }
 }

@@ -70,7 +70,8 @@ if __name__ == "__main__":
 
     # --------------------------- Init WebSocket client -------------------------- #
 
-    ws = websocket.WebSocketApp(config['ws']['uri'], on_message=on_message, on_error=on_error, on_close=on_close)
+    ws_port = os.environ.get('WS_PORT', '8080')
+    ws = websocket.WebSocketApp(config['ws']['uri'] + f':{ws_port}', on_message=on_message, on_error=on_error, on_close=on_close)
     ws.on_open = on_open
 
     # --------------------------------- Main Loop -------------------------------- #
