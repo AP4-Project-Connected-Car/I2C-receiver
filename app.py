@@ -1,9 +1,9 @@
 # TODO: Uncomment bus library import
 # from smbus2 import SMBus
-import time, json, threading, os, importlib
+import time, json, threading, os, importlib, websocket
 
 from utils.logger import export_loggers, setup_logger
-
+from utils.ws import on_message, on_error, on_close
 # ----------------------------- Config / Loggers ----------------------------- #
 
 # Import config
@@ -18,25 +18,33 @@ component_loggers = export_loggers(I2C_DEBUG_LOG)
 # --------------------------- Threads main function -------------------------- #
 
 running = True
+wsc = None
 def read_data_from_component(name, bus):
     """
     Read I2C bus for a specified component
     name (str) : The component name
     bus (SMBus) : The I2C bus to read from
     """
-    global running
+    global running, wsc
 
     while running:
         try:
             # Import and run the component read function
             comp_module = importlib.import_module(f"readers.{name}")
-            timeout = comp_module.read_bus(bus)
+            timeout = comp_module.read_bus(bus, wsc)
 
             # Wait before read again
             time.sleep(timeout)
 
         except KeyboardInterrupt:  # Quitting
             running = False
+
+def on_open(ws):
+    """ When the WS client is connected """
+    global wsc
+    
+    main_logger.info("WS connection opened !")
+    wsc = ws
 
 # ---------------------------------------------------------------------------- #
 #                                 Main content                                 #
@@ -60,19 +68,23 @@ if __name__ == "__main__":
     for name in threads:
         threads[name].start()
 
+    # --------------------------- Init WebSocket client -------------------------- #
+
+    ws = websocket.WebSocketApp(config['ws']['uri'], on_message=on_message, on_error=on_error, on_close=on_close)
+    ws.on_open = on_open
+
     # --------------------------------- Main Loop -------------------------------- #
 
-    while running:
-        try:
-            time.sleep(0.1)
-        except KeyboardInterrupt:  # Quitting
-            print("\nQuitting...")
-            running = False
+    try:
+        ws.run_forever()
+    except:  # Quitting
+        print("\nQuitting...")
+        running = False
 
-            # Stopping threads
-            for name in threads:
-                threads[name].join()
+        # Stopping threads
+        for name in threads:
+            threads[name].join()
 
-            # Closing I2C bus
-            # TODO: Uncomment bus closing
-            # bus.close()
+        # Closing I2C bus
+        # TODO: Uncomment bus closing
+        # bus.close()

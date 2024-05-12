@@ -1,5 +1,8 @@
 import json, logging
 
+# TODO: Remove
+import random
+
 # ----------------------------- Config / Loggers ----------------------------- #
 
 with open('config.json', 'r') as config_file:
@@ -14,26 +17,38 @@ ERR_TIMEOUT = comp_config['err_timeout']
 
 # ------------------------------- Read function ------------------------------ #
 
-def read_bus(bus):
+def read_bus(bus, wsc):
+    if wsc is None:
+        return ERR_TIMEOUT
+        
     # Get data from the bus
     try:
         # TODO: Uncomment bus read line
         # data = bus.read_i2c_block_data(ADDR, 0, 16)
-        data = [123, 34, 100, 97, 116, 97, 34, 58, 32, 52, 125]
+        i = round(random.uniform(10, 90), 1)
+        data = [ord(char) for char in '{"data": ' + str(i) + '}']
     except:
         logger.error('remote i/o error')
         return ERR_TIMEOUT
 
     # Decode and clean
-    logger.debug(data)
     data_str = "".join(map(chr, data))
     data_str = data_str.replace(chr(255), '')
-    logger.debug(data_str)
 
     # Parse using JSON
     try:
         data_json = json.loads(data_str)
-        logger.info(data_json)
+        to_send = {
+            'for': 'server',
+            'component': 'coolingLiquidTemp',
+            'content': {
+                'value': data_json['data']
+            }
+        }
+        logger.debug(json.dumps(to_send))
+
+        # Send the data to the server
+        wsc.send(json.dumps(to_send))
     except json.decoder.JSONDecodeError:
         logger.error("JSON error")
         return ERR_TIMEOUT

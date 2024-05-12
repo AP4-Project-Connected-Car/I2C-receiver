@@ -7,13 +7,16 @@
         },
         "battery": {
             "addr": 12,
-            "timeout": 1,
+            "timeout": 5,
             "err_timeout": 5
         },
         "cooling_liquid_temp": {
             "addr": 13,
-            "timeout": 1,
+            "timeout": 5,
             "err_timeout": 5
         }
+    },
+    "ws": {
+        "uri": "ws://server:8082"
     }
 }
