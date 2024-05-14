@@ -1,5 +1,4 @@
-# TODO: Uncomment bus library import
-# from smbus2 import SMBus
+from smbus2 import SMBus
 import time, json, threading, os, importlib, websocket
 
 from utils.logger import export_loggers, setup_logger
@@ -54,15 +53,13 @@ if __name__ == "__main__":
 
     # ------------------------------- Init threads ------------------------------- #
 
-    # TODO: Uncomment bus init
     # Init I2C bus (/dev/ic2-1)
-    # bus = SMBus(1) 
+    bus = SMBus(1) 
 
     # Creating threads for each address
     threads = {}
     for name in config['components']:
-        # TODO: Add bus param
-        threads[name] = threading.Thread(target=read_data_from_component, args=(name, None))
+        threads[name] = threading.Thread(target=read_data_from_component, args=(name, bus))
 
     # Starting threads
     for name in threads:
@@ -87,5 +84,4 @@ if __name__ == "__main__":
             threads[name].join()
 
         # Closing I2C bus
-        # TODO: Uncomment bus closing
-        # bus.close()
+        bus.close()

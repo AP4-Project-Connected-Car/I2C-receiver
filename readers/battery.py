@@ -1,8 +1,5 @@
 import json, logging
 
-# TODO: Remove
-import random
-
 # ----------------------------- Config / Loggers ----------------------------- #
 
 with open('config.json', 'r') as config_file:
@@ -18,17 +15,13 @@ ERR_TIMEOUT = comp_config['err_timeout']
 # ------------------------------- Read function ------------------------------ #
 
 def read_bus(bus, wsc):
-    global i
-
     if wsc is None:
         return ERR_TIMEOUT
 
     # Get data from the bus
     try:
-        # TODO: Uncomment bus read line
-        # data = bus.read_i2c_block_data(ADDR, 0, 16)
-        i = round(random.uniform(10, 14), 2)
-        data = [ord(char) for char in '{"data": ' + str(i) + '}']
+        data = bus.read_i2c_block_data(ADDR, 0, 16)
+        logger.debug(data)
     except:
         logger.error('remote i/o error')
         return ERR_TIMEOUT
@@ -47,7 +40,7 @@ def read_bus(bus, wsc):
                 'value': data_json['data']
             }
         }
-        logger.debug(json.dumps(to_send))
+        logger.info(json.dumps(to_send))
 
         # Send the data to the server
         wsc.send(json.dumps(to_send))
